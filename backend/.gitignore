@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Prisma generated files
+/generated/prisma/
+
+# Logs & Coverage
+*.log
+logs/
+coverage/
+
+# AI tool local caches & skills
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+
