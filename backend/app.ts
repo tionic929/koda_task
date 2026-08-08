@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import projectRoutes from "./src/routes/project.routes.js";
+import authRoutes from "./src/routes/auth.routes.js";
 import { errorHandler, notFoundHandler } from "./src/middleware/error.middleware.js";
 
 const app = express();
@@ -9,6 +10,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/projects", projectRoutes);
 app.use("/api/projects", projectRoutes);
 
