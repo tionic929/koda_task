@@ -3,11 +3,37 @@ import type {
   Project,
   CreateProjectInput,
   UpdateProjectInput,
+  ProjectQueryParams,
+  PaginatedResponse,
 } from "../types/project.types";
 
 export class ProjectService {
-  static async getAllProjects(): Promise<Project[]> {
-    const response = await api.get<Project[]>("/projects");
+  static async getAllProjects(params?: ProjectQueryParams): Promise<PaginatedResponse<Project>> {
+    const cleanParams: Record<string, string | number> = {};
+    if (params) {
+      if (params.search && params.search.trim() !== "") {
+        cleanParams.search = params.search.trim();
+      }
+      if (params.status) {
+        cleanParams.status = params.status;
+      }
+      if (params.priority) {
+        cleanParams.priority = params.priority;
+      }
+      if (params.sortBy) {
+        cleanParams.sortBy = params.sortBy;
+      }
+      if (params.sortOrder) {
+        cleanParams.sortOrder = params.sortOrder;
+      }
+      if (params.page) {
+        cleanParams.page = params.page;
+      }
+      if (params.limit) {
+        cleanParams.limit = params.limit;
+      }
+    }
+    const response = await api.get<PaginatedResponse<Project>>("/projects", { params: cleanParams });
     return response.data;
   }
 

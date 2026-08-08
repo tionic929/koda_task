@@ -1,11 +1,87 @@
 import { prisma } from "../lib/prisma.js";
 import type { CreateProjectInput, UpdateProjectInput } from "../schemas/project.schema.js";
+import type { ProjectQueryParams } from "../schemas/projectQuery.schema.js";
+
+const PRIORITY_ORDER: Record<string, number> = {
+  High: 1,
+  Medium: 2,
+  Low: 3,
+};
 
 export class ProjectService {
-  static async getAllProjects() {
-    return await prisma.project.findMany({
-      orderBy: { createdAt: "desc" },
+  static async getAllProjects(params?: ProjectQueryParams) {
+    const where: any = {};
+
+    if (params) {
+      const { search, status, priority } = params;
+
+      if (search && typeof search === "string" && search.trim() !== "") {
+        const searchTerm = search.trim();
+        where.OR = [
+          { projectName: { contains: searchTerm } },
+          { clientName: { contains: searchTerm } },
+        ];
+      }
+
+      if (status) {
+        where.status = status;
+      }
+
+      if (priority) {
+        where.priority = priority;
+      }
+    }
+
+    const sortBy = params?.sortBy || "createdAt";
+    const sortOrder = params?.sortOrder || "desc";
+    const page = params?.page ? Math.max(1, Number(params.page)) : 1;
+    const limit = params?.limit ? Math.max(1, Number(params.limit)) : 6;
+
+    const orderBy: any = {};
+    if (sortBy !== "priority") {
+      orderBy[sortBy] = sortOrder;
+    }
+
+    let allMatching = await prisma.project.findMany({
+      where,
+      orderBy: sortBy !== "priority" ? orderBy : { createdAt: "desc" },
     });
+
+    // In-memory case-insensitive search fallback for SQLite edge cases
+    if (params?.search && params.search.trim() !== "") {
+      const lowerSearch = params.search.trim().toLowerCase();
+      allMatching = allMatching.filter(
+        (p) =>
+          p.projectName.toLowerCase().includes(lowerSearch) ||
+          p.clientName.toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    // Custom business priority sorting (High -> Medium -> Low)
+    if (sortBy === "priority") {
+      allMatching.sort((a, b) => {
+        const weightA = PRIORITY_ORDER[a.priority] ?? 99;
+        const weightB = PRIORITY_ORDER[b.priority] ?? 99;
+        if (sortOrder === "asc") {
+          return weightA - weightB; // High (1) -> Medium (2) -> Low (3)
+        } else {
+          return weightB - weightA; // Low (3) -> Medium (2) -> High (1)
+        }
+      });
+    }
+
+    const total = allMatching.length;
+    const totalPages = Math.ceil(total / limit) || 1;
+    const startIndex = (page - 1) * limit;
+    const paginatedProjects = allMatching.slice(startIndex, startIndex + limit);
+
+    return {
+      data: paginatedProjects,
+      total,
+      page,
+      totalPages,
+      limit,
+    };
   }
 
   static async getProjectById(id: string) {

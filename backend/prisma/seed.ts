@@ -1,4 +1,5 @@
 import { prisma } from "../src/lib/prisma.js";
+import { hashPassword } from "../src/utils/password.js";
 
 const testData = [
   {
@@ -124,10 +125,22 @@ const testData = [
 ];
 
 async function main() {
-  console.log("🌱 Clearing existing database projects...");
+  console.log("Clearing existing database records...");
   await prisma.project.deleteMany();
+  await prisma.user.deleteMany();
 
-  console.log("🚀 Populating database with official assessment test data (12 projects)...");
+  console.log("Creating default admin user (admin@agency.com / password123)...");
+  const hashedPassword = await hashPassword("password123");
+  await prisma.user.create({
+    data: {
+      email: "admin@agency.com",
+      password: hashedPassword,
+      name: "Admin User",
+      role: "ADMIN",
+    },
+  });
+
+  console.log("Populating database with official assessment test data (12 projects)...");
 
   for (const item of testData) {
     await prisma.project.create({
@@ -144,12 +157,12 @@ async function main() {
     });
   }
 
-  console.log("✅ Successfully seeded official test data!");
+  console.log("Successfully seeded default user and test projects!");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Error seeding database:", e);
+    console.error("Error seeding database:", e);
     process.exit(1);
   })
   .finally(async () => {

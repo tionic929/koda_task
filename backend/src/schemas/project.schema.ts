@@ -9,6 +9,14 @@ export const ProjectStatusEnum = z.enum([
 
 export const ProjectPriorityEnum = z.enum(["Low", "Medium", "High"]);
 
+const isBeforeToday = (dateStr: string) => {
+  const dateObj = new Date(dateStr);
+  const todayObj = new Date();
+  todayObj.setHours(0, 0, 0, 0);
+  dateObj.setHours(0, 0, 0, 0);
+  return dateObj < todayObj;
+};
+
 export const createProjectSchema = z
   .object({
     clientName: z.string().trim().min(1, { message: "Client Name is required." }),
@@ -16,7 +24,12 @@ export const createProjectSchema = z
     description: z.string().trim().optional(),
     status: ProjectStatusEnum,
     priority: ProjectPriorityEnum,
-    startDate: z.string().datetime({ message: "Start Date must be a valid ISO date." }),
+    startDate: z
+      .string()
+      .datetime({ message: "Start Date must be a valid ISO date." })
+      .refine((val) => !isBeforeToday(val), {
+        message: "Start Date cannot be in the past.",
+      }),
     dueDate: z.string().datetime({ message: "Due Date must be a valid ISO date." }),
   })
   .refine(
@@ -38,7 +51,13 @@ export const updateProjectSchema = z
     description: z.string().trim().optional(),
     status: ProjectStatusEnum.optional(),
     priority: ProjectPriorityEnum.optional(),
-    startDate: z.string().datetime({ message: "Start Date must be a valid ISO date." }).optional(),
+    startDate: z
+      .string()
+      .datetime({ message: "Start Date must be a valid ISO date." })
+      .refine((val) => !isBeforeToday(val), {
+        message: "Start Date cannot be in the past.",
+      })
+      .optional(),
     dueDate: z.string().datetime({ message: "Due Date must be a valid ISO date." }).optional(),
   })
   .refine(
