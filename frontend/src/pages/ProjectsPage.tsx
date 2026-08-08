@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Plus } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 import {
   useProjects,
   useCreateProject,
@@ -12,6 +13,8 @@ import { ProjectFilters } from "../components/projects/ProjectFilters";
 import { ProjectForm } from "../components/projects/ProjectForm";
 import { DeleteProjectDialog } from "../components/projects/DeleteProjectDialog";
 import { Pagination } from "../components/ui/Pagination";
+import { ProfileDropdown } from "../components/ui/ProfileDropdown";
+import { LogoutDialog } from "../components/ui/LogoutDialog";
 import { Modal } from "../components/ui/Modal";
 import { Button } from "../components/ui/Button";
 import type {
@@ -32,6 +35,7 @@ const defaultFilters: ProjectQueryParams = {
 };
 
 export const ProjectsPage: React.FC = () => {
+  const { user, logout } = useAuth();
   const [filters, setFilters] = useState<ProjectQueryParams>(defaultFilters);
 
   const {
@@ -51,9 +55,11 @@ export const ProjectsPage: React.FC = () => {
   const updateMutation = useUpdateProject();
   const deleteMutation = useDeleteProject();
 
-  // Modal State Management
+  // Modal & Dialog State Management
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -100,6 +106,7 @@ export const ProjectsPage: React.FC = () => {
   const handleCloseModals = () => {
     setIsFormModalOpen(false);
     setIsDeleteModalOpen(false);
+    setIsLogoutDialogOpen(false);
     setSelectedProject(null);
     setApiError(null);
   };
@@ -142,6 +149,15 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
+  const handleConfirmLogout = () => {
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      logout();
+      setIsLoggingOut(false);
+      setIsLogoutDialogOpen(false);
+    }, 300);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -163,6 +179,17 @@ export const ProjectsPage: React.FC = () => {
             </p>
           </div>
 
+          <div className="flex items-center space-x-3">
+            {user && (
+              <ProfileDropdown
+                user={user}
+                onLogoutClick={() => setIsLogoutDialogOpen(true)}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end">
           <Button variant="primary" onClick={handleOpenCreateModal}>
             <Plus className="w-4 h-4 mr-2" />
             New Project
@@ -231,6 +258,14 @@ export const ProjectsPage: React.FC = () => {
           onConfirm={handleDeleteProject}
           onCancel={handleCloseModals}
           isLoading={deleteMutation.isPending}
+        />
+
+        {/* Logout Confirmation Dialog */}
+        <LogoutDialog
+          isOpen={isLogoutDialogOpen}
+          onConfirm={handleConfirmLogout}
+          onCancel={handleCloseModals}
+          isLoading={isLoggingOut}
         />
       </div>
     </div>

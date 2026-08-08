@@ -129,6 +129,13 @@ npm run dev
 
 Base URL: `http://localhost:5000/api`
 
+### Authentication Endpoints (`/api/auth`)
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Authenticate user & return JWT token | No |
+| `GET` | `/api/auth/me` | Fetch currently authenticated user profile | Yes (Bearer Token) |
+
+### Project Endpoints (`/api/projects`)
 | Method | Endpoint | Description | Validation |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/projects` | Retrieve all projects | — |
