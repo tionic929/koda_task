@@ -229,11 +229,11 @@ Base URL: `http://localhost:5000/api`
 
 ### 5. Did you use AI tools during development?
 **Yes.**
-- **Which tools?**: Antigravity AI Assistant (Claude Opus / Gemini Flash models).
+- **Which tools?**: Antigravity AI Assistant.
 - **How were they used?**:
-  - *Architecture & Scaffolding*: Assisting in structuring modular Express controllers/services and TanStack Query custom hooks.
-  - *Testing Suite Creation*: Generating comprehensive unit test cases using Vitest and React Testing Library for edge cases (date validations, query parameter coercions, middleware error handling).
-  - *Troubleshooting & Refactoring*: Diagnosing native compilation errors with native C++ modules and refactoring the Prisma database layer to use Node's native SQLite driver adapter.
+  - *Boilerplate & Architecture Scaffolding*: Assisting in structuring modular boilerplate for Express controllers/services, React custom hooks, and Zod validation schemas.
+  - *Testing Suite Generation*: Accelerating the creation of Vitest and React Testing Library unit test boilerplate for edge cases (date validations, query parameter coercions, middleware error handling).
+  - *Troubleshooting & Debugging*: Diagnosing cross-platform native compilation errors (`node-gyp`) and researching Prisma 7 native driver adapter alternatives (`prisma-adapter-node-sqlite`).
 
 ---
 
