@@ -20,3 +20,5 @@ export const validateBody = (schema: ZodSchema) => {
     }
   };
 };
+
+export const validate = validateBody;

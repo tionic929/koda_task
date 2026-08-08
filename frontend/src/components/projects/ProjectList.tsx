@@ -1,12 +1,15 @@
 import React from "react";
 import { ProjectCard } from "./ProjectCard";
 import type { Project } from "../../types/project.types";
-import { RefreshCw, FolderOpen } from "lucide-react";
+import { RefreshCw, FolderOpen, SearchX } from "lucide-react";
+import { Button } from "../ui/Button";
 
 interface ProjectListProps {
   projects: Project[];
   isLoading: boolean;
   isFetching: boolean;
+  isFilterActive?: boolean;
+  onResetFilters?: () => void;
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
 }
@@ -15,6 +18,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   projects,
   isLoading,
   isFetching,
+  isFilterActive = false,
+  onResetFilters,
   onEdit,
   onDelete,
 }) => {
@@ -49,14 +54,35 @@ export const ProjectList: React.FC<ProjectListProps> = ({
 
       {/* Empty State */}
       {projects.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-white border border-dashed border-slate-300 rounded-xl shadow-sm">
-          <FolderOpen className="w-12 h-12 mx-auto text-slate-400 mb-3" />
-          <h3 className="text-base font-semibold text-slate-900">
-            No projects found
-          </h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Get started by creating a new client project using the button above.
-          </p>
+        <div className="text-center py-16 px-4 bg-white border border-dashed border-slate-300 rounded-xl shadow-sm space-y-3">
+          {isFilterActive ? (
+            <>
+              <SearchX className="w-12 h-12 mx-auto text-slate-400 mb-1" />
+              <h3 className="text-base font-semibold text-slate-900">
+                No matching projects found
+              </h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                No projects matched your active search term or filter criteria.
+              </p>
+              {onResetFilters && (
+                <div className="pt-2">
+                  <Button variant="secondary" size="sm" onClick={onResetFilters}>
+                    Reset All Filters
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <FolderOpen className="w-12 h-12 mx-auto text-slate-400 mb-1" />
+              <h3 className="text-base font-semibold text-slate-900">
+                No projects found
+              </h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Get started by creating a new client project using the button above.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         /* Project Grid */

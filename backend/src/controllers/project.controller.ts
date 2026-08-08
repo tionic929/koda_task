@@ -1,10 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import { ProjectService } from "../services/project.service.js";
+import { projectQuerySchema } from "../schemas/projectQuery.schema.js";
 
 export class ProjectController {
-  static async getAllProjects(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  static async getAllProjects(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const projects = await ProjectService.getAllProjects();
+      const queryParams = projectQuerySchema.parse(req.query);
+      const projects = await ProjectService.getAllProjects(queryParams);
       res.status(200).json(projects);
     } catch (error) {
       next(error);

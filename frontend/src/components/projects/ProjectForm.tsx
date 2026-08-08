@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { projectFormSchema, type ProjectFormData } from "./ProjectFormSchema";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
@@ -21,6 +21,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   isLoading = false,
   apiError,
 }) => {
+  const getTodayString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = getTodayString();
+
   const formatDateForInput = (dateStr?: string) => {
     if (!dateStr) return "";
     try {
@@ -34,6 +44,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors },
   } = useForm<ProjectFormData>({
     defaultValues: {
@@ -42,11 +53,12 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       description: initialData?.description || "",
       status: initialData?.status || "Planning",
       priority: initialData?.priority || "Medium",
-      startDate: formatDateForInput(initialData?.startDate) || new Date().toISOString().split("T")[0],
+      startDate: formatDateForInput(initialData?.startDate) || todayStr,
       dueDate: formatDateForInput(initialData?.dueDate) || new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
     },
   });
 
+  const startDateValue = useWatch({ control, name: "startDate" });
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleFormSubmit = async (data: ProjectFormData) => {
@@ -141,6 +153,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         <Input
           type="date"
           label="Start Date *"
+          min={todayStr}
           error={errors.startDate?.message}
           {...register("startDate")}
         />
@@ -148,6 +161,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         <Input
           type="date"
           label="Due Date *"
+          min={startDateValue || todayStr}
           error={errors.dueDate?.message}
           {...register("dueDate")}
         />
