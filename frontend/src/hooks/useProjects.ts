@@ -3,23 +3,35 @@ import { ProjectService } from "../services/project.service";
 import type {
   CreateProjectInput,
   UpdateProjectInput,
+  ProjectQueryParams,
   ApiErrorResponse,
 } from "../types/project.types";
 import { AxiosError } from "axios";
 
 export const PROJECTS_QUERY_KEY = ["projects"];
 
-export function useProjects() {
+export function useProjects(params?: ProjectQueryParams) {
   const query = useQuery({
-    queryKey: PROJECTS_QUERY_KEY,
-    queryFn: () => ProjectService.getAllProjects(),
+    queryKey: [
+      ...PROJECTS_QUERY_KEY,
+      params?.search || "",
+      params?.status || "",
+      params?.priority || "",
+      params?.sortBy || "createdAt",
+      params?.sortOrder || "desc",
+      params?.page || 1,
+      params?.limit || 6,
+    ],
+    queryFn: () => ProjectService.getAllProjects(params),
   });
 
   return {
-    projects: query.data ?? [],
-    // isLoading: true only during initial data fetch (no cached data yet)
+    projects: query.data?.data ?? [],
+    total: query.data?.total ?? 0,
+    page: query.data?.page ?? 1,
+    totalPages: query.data?.totalPages ?? 1,
+    limit: query.data?.limit ?? 6,
     isLoading: query.isLoading,
-    // isFetching: true whenever a network request is in flight (including background revalidation)
     isFetching: query.isFetching,
     isError: query.isError,
     error: query.error,
@@ -49,7 +61,6 @@ export function useCreateProject() {
   return useMutation({
     mutationFn: (data: CreateProjectInput) => ProjectService.createProject(data),
     onSuccess: () => {
-      // Invalidate to trigger clean background refetch without UI flickering
       queryClient.invalidateQueries({ queryKey: PROJECTS_QUERY_KEY });
     },
   });

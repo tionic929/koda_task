@@ -8,15 +8,45 @@ import {
   getErrorMessage,
 } from "../hooks/useProjects";
 import { ProjectList } from "../components/projects/ProjectList";
+import { ProjectFilters } from "../components/projects/ProjectFilters";
 import { ProjectForm } from "../components/projects/ProjectForm";
 import { DeleteProjectDialog } from "../components/projects/DeleteProjectDialog";
+import { Pagination } from "../components/ui/Pagination";
 import { Modal } from "../components/ui/Modal";
 import { Button } from "../components/ui/Button";
-import type { Project, CreateProjectInput } from "../types/project.types";
+import type {
+  Project,
+  CreateProjectInput,
+  ProjectQueryParams,
+} from "../types/project.types";
 import logoImg from "../assets/clienttrackerlogo.png";
 
+const defaultFilters: ProjectQueryParams = {
+  search: "",
+  status: "",
+  priority: "",
+  sortBy: "createdAt",
+  sortOrder: "desc",
+  page: 1,
+  limit: 6,
+};
+
 export const ProjectsPage: React.FC = () => {
-  const { projects, isLoading, isFetching, isError, error, refetch } = useProjects();
+  const [filters, setFilters] = useState<ProjectQueryParams>(defaultFilters);
+
+  const {
+    projects,
+    total,
+    page,
+    totalPages,
+    limit,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useProjects(filters);
+
   const createMutation = useCreateProject();
   const updateMutation = useUpdateProject();
   const deleteMutation = useDeleteProject();
@@ -29,6 +59,26 @@ export const ProjectsPage: React.FC = () => {
 
   // Track component mount status to avoid state updates on unmounted components
   const isSubmittingRef = useRef(false);
+
+  const handleFilterChange = (newFilters: Partial<ProjectQueryParams>) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+  };
+
+  const handleResetFilters = () => {
+    setFilters(defaultFilters);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setFilters((prev) => ({ ...prev, page: newPage }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const isFilterActive =
+    Boolean(filters.search && filters.search.trim() !== "") ||
+    Boolean(filters.status) ||
+    Boolean(filters.priority) ||
+    Boolean(filters.sortBy && filters.sortBy !== "createdAt") ||
+    Boolean(filters.sortOrder && filters.sortOrder !== "desc");
 
   const handleOpenCreateModal = () => {
     setSelectedProject(null);
@@ -94,7 +144,7 @@ export const ProjectsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
           <div>
@@ -131,13 +181,32 @@ export const ProjectsPage: React.FC = () => {
           </div>
         )}
 
+        {/* Project Filters & Discovery Bar */}
+        <ProjectFilters
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onResetFilters={handleResetFilters}
+          totalCount={total}
+        />
+
         {/* Project List */}
         <ProjectList
           projects={projects}
           isLoading={isLoading}
           isFetching={isFetching}
+          isFilterActive={isFilterActive}
+          onResetFilters={handleResetFilters}
           onEdit={handleOpenEditModal}
           onDelete={handleOpenDeleteDialog}
+        />
+
+        {/* Pagination Component */}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={total}
+          itemsPerPage={limit}
         />
 
         {/* Create / Edit Project Modal */}

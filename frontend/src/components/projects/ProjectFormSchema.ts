@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+const isBeforeToday = (dateStr: string) => {
+  if (!dateStr) return false;
+  const dateObj = new Date(dateStr);
+  const todayObj = new Date();
+  todayObj.setHours(0, 0, 0, 0);
+  dateObj.setHours(0, 0, 0, 0);
+  return dateObj < todayObj;
+};
+
 export const projectFormSchema = z
   .object({
     clientName: z.string().trim().min(1, { message: "Client Name is required." }),
@@ -11,7 +20,12 @@ export const projectFormSchema = z
     priority: z.enum(["Low", "Medium", "High"], {
       message: "Priority must be valid.",
     }),
-    startDate: z.string().min(1, { message: "Start Date is required." }),
+    startDate: z
+      .string()
+      .min(1, { message: "Start Date is required." })
+      .refine((val) => !isBeforeToday(val), {
+        message: "Start Date cannot be in the past.",
+      }),
     dueDate: z.string().min(1, { message: "Due Date is required." }),
   })
   .refine(

@@ -35,6 +35,24 @@ export interface UpdateProjectInput {
   dueDate?: string;
 }
 
+export interface ProjectQueryParams {
+  search?: string;
+  status?: ProjectStatus | "";
+  priority?: ProjectPriority | "";
+  sortBy?: "dueDate" | "startDate" | "projectName" | "priority" | "createdAt";
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  totalPages: number;
+  limit: number;
+}
+
 export interface ApiErrorResponse {
   error: string;
   details?: string[];
