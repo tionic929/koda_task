@@ -21,8 +21,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   isLoading = false,
   apiError,
 }) => {
-  const todayStr = new Date().toISOString().split("T")[0];
-
   const formatDateForInput = (dateStr?: string) => {
     if (!dateStr) return "";
     try {
@@ -44,7 +42,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       description: initialData?.description || "",
       status: initialData?.status || "Planning",
       priority: initialData?.priority || "Medium",
-      startDate: formatDateForInput(initialData?.startDate) || todayStr,
+      startDate: formatDateForInput(initialData?.startDate) || new Date().toISOString().split("T")[0],
       dueDate: formatDateForInput(initialData?.dueDate) || new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
     },
   });
@@ -143,7 +141,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         <Input
           type="date"
           label="Start Date *"
-          max={todayStr}
           error={errors.startDate?.message}
           {...register("startDate")}
         />
@@ -151,7 +148,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         <Input
           type="date"
           label="Due Date *"
-          min={todayStr}
           error={errors.dueDate?.message}
           {...register("dueDate")}
         />

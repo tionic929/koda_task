@@ -22,30 +22,6 @@ export const createProjectSchema = z
   .refine(
     (data) => {
       const start = new Date(data.startDate);
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      return start <= today;
-    },
-    {
-      message: "Start Date cannot be in the future.",
-      path: ["startDate"],
-    }
-  )
-  .refine(
-    (data) => {
-      const due = new Date(data.dueDate);
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      return due >= todayStart;
-    },
-    {
-      message: "Due Date cannot be in the past.",
-      path: ["dueDate"],
-    }
-  )
-  .refine(
-    (data) => {
-      const start = new Date(data.startDate);
       const due = new Date(data.dueDate);
       return due >= start;
     },
@@ -65,36 +41,6 @@ export const updateProjectSchema = z
     startDate: z.string().datetime({ message: "Start Date must be a valid ISO date." }).optional(),
     dueDate: z.string().datetime({ message: "Due Date must be a valid ISO date." }).optional(),
   })
-  .refine(
-    (data) => {
-      if (data.startDate) {
-        const start = new Date(data.startDate);
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        return start <= today;
-      }
-      return true;
-    },
-    {
-      message: "Start Date cannot be in the future.",
-      path: ["startDate"],
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.dueDate) {
-        const due = new Date(data.dueDate);
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        return due >= todayStart;
-      }
-      return true;
-    },
-    {
-      message: "Due Date cannot be in the past.",
-      path: ["dueDate"],
-    }
-  )
   .refine(
     (data) => {
       if (data.startDate && data.dueDate) {

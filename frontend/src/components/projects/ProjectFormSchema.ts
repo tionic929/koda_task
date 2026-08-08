@@ -16,36 +16,6 @@ export const projectFormSchema = z
   })
   .refine(
     (data) => {
-      if (data.startDate) {
-        const start = new Date(data.startDate);
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        return start <= today;
-      }
-      return true;
-    },
-    {
-      message: "Start Date cannot be in the future.",
-      path: ["startDate"],
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.dueDate) {
-        const due = new Date(data.dueDate);
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        return due >= todayStart;
-      }
-      return true;
-    },
-    {
-      message: "Due Date cannot be in the past.",
-      path: ["dueDate"],
-    }
-  )
-  .refine(
-    (data) => {
       if (data.startDate && data.dueDate) {
         const start = new Date(data.startDate);
         const due = new Date(data.dueDate);
