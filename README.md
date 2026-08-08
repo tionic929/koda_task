@@ -4,9 +4,42 @@ A modern, production-grade full-stack project tracking application built for dig
 
 ---
 
+## 📋 Technology Choices
+
+### Frontend Stack
+* **React 19 + TypeScript + Vite**: Chosen for fast build times, instant HMR during development, and strict type safety across components and API models.
+* **TanStack Query (`@tanstack/react-query` v5)**: Manages server state, automatic query caching, background refetching, and pagination state without boilerplate code or race conditions.
+* **React Hook Form + Zod**: Provides type-safe form validation with zero unneeded component re-renders.
+* **Tailwind CSS v4 + Lucide Icons**: Provides responsive, accessible, utility-first styling with modern UI micro-animations and status/priority badges.
+* **Vitest + React Testing Library + jsdom**: Modern component and hook unit testing.
+
+### Backend Stack
+* **Node.js 22 (ES Modules) + Express.js**: Simple, asynchronous, lightweight REST API framework.
+* **Prisma 7 ORM + SQLite**: Type-safe database queries. Configured with the native `prisma-adapter-node-sqlite` driver adapter to utilize Node.js's built-in `node:sqlite` engine, eliminating native C++ compilation (`node-gyp`) dependencies.
+* **JWT (`jsonwebtoken`) + Password Hashing (`bcryptjs`)**: Secure token-based authentication and salted password storage.
+* **Zod**: Strict request payload and query string validation middleware.
+* **Vitest**: Fast, ESM-native unit testing runner.
+
+### DevOps & Infrastructure
+* **Docker & Docker Compose**: Automated container building and runtime orchestration for zero-setup execution.
+
+---
+
+## 💡 Assumptions Made
+
+1. **Authentication Scope**: The assessment specifies role-based access for agency project managers. A default pre-seeded admin user (`admin@agency.com` / `password123`) is generated upon database initialization for instant testing.
+2. **Database Choice**: SQLite was chosen as the primary database to ensure zero-configuration setup for reviewers while providing full relational database capabilities via Prisma ORM.
+3. **Date Validation Rules**:
+   - `startDate` cannot be set in the past at creation time.
+   - `dueDate` cannot be set earlier than `startDate`.
+   - Frontend date pickers dynamically enforce minimum allowed dates to prevent user entry errors.
+4. **Pagination Layout**: Default page size is set to 6 projects per page to maintain an optimal grid layout across desktop and mobile devices without excessive scrolling.
+
+---
+
 ## 🚀 Key Features
 
-* **Project Management**: Create, edit, view details, and soft/hard delete client projects.
+* **Project Management**: Create, edit, view details, and delete client projects.
 * **JWT Authentication**: Secure login flow with persistent session storage, profile context, and protected API routes.
 * **Discovery & Filtering**:
   * Case-insensitive instant search by Client Name or Project Name.
@@ -14,34 +47,9 @@ A modern, production-grade full-stack project tracking application built for dig
   * Priority level filtering (`Low`, `Medium`, `High`).
   * Sorting options (Newest First, Due Date Earliest/Latest, Start Date, Project Name A-Z, Business Priority High->Low).
   * Server-side & client-side paginated grid layout (6 projects per page).
-* **Strict Date Validations**:
-  * `startDate` cannot be set in the past.
-  * `dueDate` cannot be earlier than `startDate`.
-  * Real-time bounds enforcement on input date pickers.
+* **Strict Date Validations**: Enforces start/due date logic on both backend Zod schemas and frontend inputs.
 * **Docker Ready**: One-command containerized launch for frontend, backend, and persistent SQLite storage (`docker compose up`).
-* **100% Test Coverage**: Full modular unit test suites using Vitest, React Testing Library, and jsdom.
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-* **Core**: React 19 + TypeScript + Vite
-* **State & Data Fetching**: TanStack Query (`@tanstack/react-query` v5) + Axios
-* **Form & Validation**: React Hook Form + Zod
-* **Styling**: Tailwind CSS v4 + Lucide Icons
-* **Testing**: Vitest + `@testing-library/react` + `@testing-library/jest-dom` + `jsdom`
-
-### Backend
-* **Runtime**: Node.js 22 (ES Modules)
-* **Framework**: Express.js
-* **ORM & Database**: Prisma 7 + SQLite (`dev.db`) via native `prisma-adapter-node-sqlite`
-* **Auth & Security**: JWT (`jsonwebtoken`) + Password Hashing (`bcryptjs`)
-* **Validation**: Zod + custom Express middleware
-* **Testing**: Vitest
-
-### DevOps & Infrastructure
-* **Containerization**: Docker + Docker Compose (`docker-compose.yml`)
+* **Complete Unit Testing**: Comprehensive test suites using Vitest across controllers, services, middlewares, UI components, and hooks.
 
 ---
 
@@ -61,14 +69,14 @@ KodaTask App/
 │   │   └── seed.ts               # Database seeder (Admin user + projects)
 │   ├── src/
 │   │   ├── controllers/          # Express route controllers & __tests__
-│   │   ├── lib/                  # Prisma client initialization
+│   │   ├── lib/                  # Prisma client setup
 │   │   ├── middleware/           # Auth, Validation, Error middlewares & __tests__
 │   │   ├── routes/               # API route definitions
 │   │   ├── schemas/              # Zod validation schemas & __tests__
 │   │   ├── services/             # Prisma data access services & __tests__
-│   │   └── utils/                # JWT & Password hashing utilities & __tests__
+│   │   └── utils/                # JWT & Password utilities & __tests__
 │   ├── app.ts                    # Express app setup
-│   ├── server.ts                 # Server startup entrypoint
+│   ├── server.ts                 # Server entrypoint
 │   ├── tsconfig.json
 │   └── package.json
 └── frontend/                     # React Vite Single Page Application
@@ -78,7 +86,7 @@ KodaTask App/
     │   ├── components/           # UI elements & Project components & __tests__
     │   ├── context/              # AuthContext & __tests__
     │   ├── hooks/                # Custom TanStack Query hooks & __tests__
-    │   ├── lib/                  # Axios & QueryClient configuration
+    │   ├── lib/                  # Axios & QueryClient setup
     │   ├── pages/                # ProjectsPage, ProjectDetailsPage, Login
     │   ├── services/             # Frontend API services & __tests__
     │   ├── test/                 # Vitest setup configuration
@@ -91,16 +99,16 @@ KodaTask App/
 
 ---
 
-## ⚙️ Getting Started
+## ⚙️ Getting Started & Setup Instructions
 
 ### Prerequisites
 * **Node.js**: v22 LTS or higher recommended
 * **npm**: v9 or higher
-* **Docker & Docker Compose** (Optional, for containerized run)
+* **Docker & Docker Compose** (Optional)
 
 ---
 
-## 🚀 Running the Project
+## 🏃 How to Run the Application
 
 ### Option A: Local Development (Without Docker)
 
@@ -133,7 +141,7 @@ KodaTask App/
 
 ### Option B: Docker Compose (One-Command Run)
 
-Run both the frontend and backend in isolated containers with automated database seeding:
+Run both services in isolated containers with automatic database migration and seeding:
 
 ```bash
 docker compose up --build
@@ -142,7 +150,7 @@ docker compose up --build
 - **Frontend App**: `http://localhost:5173`
 - **Backend API**: `http://localhost:5000`
 
-To stop and remove containers:
+To stop containers:
 ```bash
 docker compose down -v
 ```
@@ -150,8 +158,6 @@ docker compose down -v
 ---
 
 ## 🧪 Running Unit Tests
-
-Both frontend and backend include modularized, standalone Vitest test suites.
 
 ### Backend Tests
 Runs 12 test suites covering utilities, Zod schemas, middlewares, services, and controllers (42 unit tests):
@@ -196,6 +202,38 @@ Base URL: `http://localhost:5000/api`
 | `POST` | `/api/projects` | Create a new client project | Validated via `createProjectSchema` |
 | `PUT` | `/api/projects/:id` | Update existing project | Validated via `updateProjectSchema` |
 | `DELETE` | `/api/projects/:id` | Delete project by ID | Valid `:id` string |
+
+---
+
+## 📝 Technical Reflection
+
+### 1. Why did you choose this implementation approach?
+- **Decoupled Architecture**: Separating the Express REST API and React SPA guarantees clean boundary separation, allowing the backend services and frontend clients to evolve independently.
+- **Declarative Server State Management**: Using TanStack Query on the frontend eliminated manual `useEffect` data fetching patterns, providing built-in caching, background revalidation, and loading/fetching state differentiation.
+- **Portable Native ORM Integration**: Leveraging Prisma 7 with the `prisma-adapter-node-sqlite` driver adapter allowed us to utilize Node.js's built-in `node:sqlite` module. This removed external C++ build tool dependencies (`node-gyp`), making local setup and Docker builds instantly runnable across operating systems.
+
+### 2. What tradeoffs did you make?
+- **SQLite vs. PostgreSQL**: SQLite was selected for portability and zero-configuration review. While PostgreSQL offers greater concurrent write performance, SQLite is optimal for single-node assessment environments.
+- **Native Driver Adapter Choice**: Using `prisma-adapter-node-sqlite` over `better-sqlite3` eliminated native build tool requirements on Windows/macOS/Linux containers, trading a slight raw I/O margin for universal cross-platform compatibility.
+- **In-Memory Priority Sorting**: Because SQLite does not natively support custom enum sorting orders in SQL queries, we implemented custom priority weight sorting (`High (1) -> Medium (2) -> Low (3)`) in the service layer prior to pagination slicing.
+
+### 3. What would you improve if given additional time?
+- **Role-Based Access Control (RBAC)**: Expand user roles beyond `ADMIN` to include `CLIENT` (read-only project view) and `PROJECT_MANAGER` (full management).
+- **Activity & Audit Logging**: Track project edits and deletion history with user IDs and timestamps.
+- **End-to-End (E2E) Testing**: Implement Playwright tests covering critical user flows (login -> project creation -> search filter -> status update -> deletion).
+- **Real-Time Updates**: Integrate WebSockets (Socket.io) or Server-Sent Events (SSE) so multi-user dashboard changes update dynamically without manual refetching.
+
+### 4. What was the most challenging part of this assessment?
+- **Cross-Environment SQLite Compatibility & Prisma 7 Driver Adapters**: Prisma 7 introduced mandatory driver adapters for database connections. Resolving compatibility between Node.js 22, Prisma 7, and native compilation requirements on Windows required transitioning from `better-sqlite3` to `prisma-adapter-node-sqlite` to eliminate `node-gyp` C++ toolchain issues.
+- **Priority-Based Sorting & Pagination Sync**: Ensuring custom business priority sorting (`High -> Medium -> Low`) interacted seamlessly with search filtering, status filtering, and server-side pagination boundaries required careful service-level ordering.
+
+### 5. Did you use AI tools during development?
+**Yes.**
+- **Which tools?**: Antigravity AI Assistant (Claude Opus / Gemini Flash models).
+- **How were they used?**:
+  - *Architecture & Scaffolding*: Assisting in structuring modular Express controllers/services and TanStack Query custom hooks.
+  - *Testing Suite Creation*: Generating comprehensive unit test cases using Vitest and React Testing Library for edge cases (date validations, query parameter coercions, middleware error handling).
+  - *Troubleshooting & Refactoring*: Diagnosing native compilation errors with native C++ modules and refactoring the Prisma database layer to use Node's native SQLite driver adapter.
 
 ---
 
